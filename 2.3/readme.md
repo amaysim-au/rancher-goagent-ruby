@@ -1,7 +1,7 @@
 rancher-gocd-agent
 =======================
 
-Builds a docker image for gocd agent with Ruby 2.2, to work on Rancher. 
+Builds a docker image for gocd agent with Ruby 2.3, to work on Rancher. 
 
 
 To build:
