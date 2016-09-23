@@ -21,7 +21,7 @@ RUN cd /tmp && \
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      zip bzip2 unzip xz-utils git-all \
+      zip bzip2 unzip xz-utils git-all sudo apt install openssh-client \
       build-essential \
       libmysqlclient-dev \
       mysql-client \
