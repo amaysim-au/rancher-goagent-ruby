@@ -19,10 +19,8 @@ RUN cd /tmp && \
     mv /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs /usr/local/bin && \
     rm -rf /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64
 
-RUN apt-get update
-
-RUN apt-get install -y --no-install-recommends \
-       zip unzip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+       zip unzip nodejs
 
 RUN mkdir /var/log/go-agent /var/run/go-agent &&\
     cd /opt && curl -sSL ${GOCD_REPO}/${GOCD_RELEASE_ARCHIVE} -O && unzip ${GOCD_RELEASE_ARCHIVE} && rm ${GOCD_RELEASE_ARCHIVE} &&\
