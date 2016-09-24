@@ -1,4 +1,4 @@
-FROM ruby:2.2.3-slim
+FROM ruby:2.2.3
 
 ENV PHANTOMJS_VERSION 2.1.1
 
@@ -19,21 +19,16 @@ RUN cd /tmp && \
     mv /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs /usr/local/bin && \
     rm -rf /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-      zip bzip2 unzip xz-utils git-all openssh-client \
-      build-essential \
-      libmysqlclient-dev libsqlite3-dev \
-      mysql-client \
-      libfreetype6 \
-      libfontconfig1 &&\
-    mkdir /var/log/go-agent /var/run/go-agent &&\
+RUN apt-get update
+
+RUN apt-get install -y --no-install-recommends \
+       zip unzip
+
+RUN mkdir /var/log/go-agent /var/run/go-agent &&\
     cd /opt && curl -sSL ${GOCD_REPO}/${GOCD_RELEASE_ARCHIVE} -O && unzip ${GOCD_RELEASE_ARCHIVE} && rm ${GOCD_RELEASE_ARCHIVE} &&\
     mv /opt/${GOCD_RELEASE}-${GOCD_VERSION} ${GOCD_HOME} &&\
     chmod 774 ${GOCD_HOME}/*.sh &&\
     mkdir -p ${GOCD_HOME}/work &&\
-    apt-get clean &&\
-    rm -rf /var/lib/apt/lists &&\
     gem install bundler
 
 RUN echo 'deb http://httpredir.debian.org/debian jessie-backports main' > /etc/apt/sources.list.d/jessie-backports.list
@@ -56,12 +51,14 @@ ENV JAVA_DEBIAN_VERSION 8u102-b14.1-1~bpo8+1
 ENV CA_CERTIFICATES_JAVA_VERSION 20140324
 
 RUN set -x \
-	&& apt-get update \
+    && apt-get update \
 	&& apt-get install -y \
 		openjdk-8-jre-headless="$JAVA_DEBIAN_VERSION" \
 		ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION" \
-	&& rm -rf /var/lib/apt/lists/* \
 	&& [ "$JAVA_HOME" = "$(docker-java-home)" ]
+
+RUN apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
