@@ -19,9 +19,10 @@ RUN cd /tmp && \
     mv /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs /usr/local/bin && \
     rm -rf /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-       zip unzip nodejs
+# Install packages
+RUN apt-get update && apt-get install -y --no-install-recommends zip unzip nodejs
 
+# Install GoCD Agent
 RUN mkdir /var/log/go-agent /var/run/go-agent &&\
     cd /opt && curl -sSL ${GOCD_REPO}/${GOCD_RELEASE_ARCHIVE} -O && unzip ${GOCD_RELEASE_ARCHIVE} && rm ${GOCD_RELEASE_ARCHIVE} &&\
     mv /opt/${GOCD_RELEASE}-${GOCD_VERSION} ${GOCD_HOME} &&\
@@ -29,6 +30,7 @@ RUN mkdir /var/log/go-agent /var/run/go-agent &&\
     mkdir -p ${GOCD_HOME}/work &&\
     gem install bundler
 
+# Install Java
 RUN echo 'deb http://httpredir.debian.org/debian jessie-backports main' > /etc/apt/sources.list.d/jessie-backports.list
 
 ENV LANG C.UTF-8
@@ -60,7 +62,13 @@ RUN apt-get clean \
 
 RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
-COPY docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
+# Install AWS CLi
+RUN curl -O https://bootstrap.pypa.io/get-pip.py &&\
+    python get-pip.py &&\
+    rm get-pip.py &&\
+    pip install awscli
+
+COPY gocd-entrypoint.sh /usr/bin/docker-entrypoint.sh
 RUN chmod +x /usr/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
