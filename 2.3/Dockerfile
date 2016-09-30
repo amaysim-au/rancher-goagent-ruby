@@ -53,6 +53,7 @@ ENV CA_CERTIFICATES_JAVA_VERSION 20140324
 RUN set -x \
     && apt-get update \
 	&& apt-get install -y \
+    python-dev \
 		openjdk-8-jre-headless="$JAVA_DEBIAN_VERSION" \
 		ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION" \
 	&& [ "$JAVA_HOME" = "$(docker-java-home)" ]
