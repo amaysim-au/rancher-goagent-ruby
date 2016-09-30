@@ -19,11 +19,10 @@ RUN cd /tmp && \
     mv /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs /usr/local/bin && \
     rm -rf /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64
 
-RUN apt-get update
+# Install packages
+RUN apt-get update && apt-get install -y --no-install-recommends zip unzip nodejs
 
-RUN apt-get install -y --no-install-recommends \
-       zip unzip
-
+# Install GoCD Agent
 RUN mkdir /var/log/go-agent /var/run/go-agent &&\
     cd /opt && curl -sSL ${GOCD_REPO}/${GOCD_RELEASE_ARCHIVE} -O && unzip ${GOCD_RELEASE_ARCHIVE} && rm ${GOCD_RELEASE_ARCHIVE} &&\
     mv /opt/${GOCD_RELEASE}-${GOCD_VERSION} ${GOCD_HOME} &&\
@@ -31,17 +30,18 @@ RUN mkdir /var/log/go-agent /var/run/go-agent &&\
     mkdir -p ${GOCD_HOME}/work &&\
     gem install bundler
 
+# Install Java
 RUN echo 'deb http://httpredir.debian.org/debian jessie-backports main' > /etc/apt/sources.list.d/jessie-backports.list
 
 ENV LANG C.UTF-8
 
 RUN { \
-    echo '#!/bin/sh'; \
-    echo 'set -e'; \
-    echo; \
-    echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
-  } > /usr/local/bin/docker-java-home \
-  && chmod +x /usr/local/bin/docker-java-home
+		echo '#!/bin/sh'; \
+		echo 'set -e'; \
+		echo; \
+		echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
+	} > /usr/local/bin/docker-java-home \
+	&& chmod +x /usr/local/bin/docker-java-home
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/jre
 
@@ -52,17 +52,23 @@ ENV CA_CERTIFICATES_JAVA_VERSION 20140324
 
 RUN set -x \
     && apt-get update \
-  && apt-get install -y \
-    openjdk-8-jre-headless="$JAVA_DEBIAN_VERSION" \
-    ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION" \
-  && [ "$JAVA_HOME" = "$(docker-java-home)" ]
+	&& apt-get install -y \
+		openjdk-8-jre-headless="$JAVA_DEBIAN_VERSION" \
+		ca-certificates-java="$CA_CERTIFICATES_JAVA_VERSION" \
+	&& [ "$JAVA_HOME" = "$(docker-java-home)" ]
 
 RUN apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 
-COPY docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
+# Install AWS CLi
+RUN curl -O https://bootstrap.pypa.io/get-pip.py &&\
+    python get-pip.py &&\
+    rm get-pip.py &&\
+    pip install awscli
+
+COPY gocd-entrypoint.sh /usr/bin/docker-entrypoint.sh
 RUN chmod +x /usr/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
