@@ -66,7 +66,8 @@ RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 RUN curl -O https://bootstrap.pypa.io/get-pip.py &&\
     python get-pip.py &&\
     rm get-pip.py &&\
-    pip install awscli
+    pip install awscli &&\
+    pip install docker-compose
 
 COPY gocd-entrypoint.sh /usr/bin/docker-entrypoint.sh
 RUN chmod +x /usr/bin/docker-entrypoint.sh
